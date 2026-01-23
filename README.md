@@ -1,53 +1,241 @@
-# Getting Started with Create React App
+# LegalGPT 📚⚖️
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An intelligent legal assistance platform powered by AI, providing comprehensive legal guidance, scholarship opportunities, and local law information through an intuitive web interface.
 
-## Available Scripts
+## 🌟 Overview
 
-In the project directory, you can run:
+LegalGPT is a full-stack application designed to make legal information accessible to everyone. Whether you need legal consultation, scholarship guidance, or local law information, LegalGPT leverages AI to provide accurate, helpful responses in real-time.
 
-### `npm start`
+## 🏗️ Project Structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+LegalGPT/
+├── legal-gpt-backend/          # FastAPI Python backend
+│   ├── app/
+│   │   ├── api/endpoints/      # API route handlers
+│   │   ├── services/           # Business logic layer
+│   │   ├── models/             # Database models
+│   │   ├── schemas/            # Pydantic schemas
+│   │   └── core/               # Security & config
+│   └── requirements.txt
+├── legal-gpt-frontend/         # React web application
+│   ├── src/
+│   │   ├── components/         # React components
+│   │   ├── App.js
+│   │   └── index.js
+│   └── package.json
+└── streamlit_version/          # Alternative Streamlit UI
+    ├── app.py
+    └── pages/
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Features
 
-### `npm test`
+- **Legal Chat Interface** - Interactive AI-powered legal consultation
+- **Scholarship Checker** - Search and filter scholarship opportunities
+- **Local Law Teller** - Access local laws and regulations
+- **Multi-format UI** - Web interface and Streamlit dashboard
+- **RESTful API** - Scalable backend architecture
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 💻 Tech Stack
 
-### `npm run build`
+### Backend
+- **Framework**: FastAPI
+- **Language**: Python 3.8+
+- **Database**: (Configured in settings)
+- **AI**: Integrated AI service for legal guidance
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Frontend
+- **Framework**: React
+- **Styling**: CSS
+- **HTTP Client**: Fetch API
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Alternative
+- **Dashboard**: Streamlit
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📋 Prerequisites
 
-### `npm run eject`
+- Python 3.8 or higher
+- Node.js 14+ and npm
+- Git
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## ⚡ Quick Start
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Backend Setup
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+cd legal-gpt-backend
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# Create virtual environment
+python -m venv venv
 
-## Learn More
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Install dependencies
+pip install -r requirements.txt
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Run the server
+python -m uvicorn app.main:app --reload
+```
 
-### Code Splitting
+The backend will be available at `http://localhost:8000`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Frontend Setup
+
+```bash
+cd legal-gpt-frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+```
+
+The frontend will open at `http://localhost:3000`
+
+### Streamlit Version
+
+```bash
+cd streamlit_version
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run Streamlit app
+streamlit run app.py
+```
+
+## 🔌 API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+
+### Chat
+- `POST /api/chat/message` - Send chat message to legal AI
+
+### Legal Services
+- `GET /api/legal/search` - Search legal information
+- `GET /api/legal/details/{id}` - Get legal details
+
+### Scholarships
+- `GET /api/scholarship/search` - Search scholarships
+- `GET /api/scholarship/filter` - Filter scholarships by criteria
+
+## 📖 Usage Examples
+
+### Chat with LegalGPT
+1. Navigate to the chat interface
+2. Type your legal question
+3. Receive AI-powered response
+4. View related content suggestions
+
+### Find Scholarships
+1. Go to Scholarship Checker
+2. Filter by criteria (field, country, amount)
+3. View matching scholarships
+4. Access application links
+
+### Search Local Laws
+1. Access Local Law Teller
+2. Search by location and topic
+3. Browse relevant regulations
+4. Get law summaries and details
+
+## 🔐 Security
+
+- JWT-based authentication
+- Secure password hashing
+- CORS enabled for production
+- Input validation on all endpoints
+
+## 📦 Dependencies
+
+### Backend Dependencies
+See `legal-gpt-backend/requirements.txt`
+
+### Frontend Dependencies
+See `legal-gpt-frontend/package.json`
+
+### Streamlit Dependencies
+See `streamlit_version/requirements.txt`
+
+## 🛠️ Development
+
+### Running Tests
+```bash
+cd legal-gpt-backend
+pytest
+```
+
+### Code Style
+- Backend: PEP 8 compliant
+- Frontend: ESLint configured
+
+## 📝 Configuration
+
+Backend configuration is managed through `legal-gpt-backend/app/config/settings.py`
+
+Key settings:
+- Database URL
+- AI Service API keys
+- CORS allowed origins
+- JWT secret key
+
+## 🚢 Deployment
+
+### Backend (Docker)
+```bash
+cd legal-gpt-backend
+docker build -t legalgpt-backend .
+docker run -p 8000:8000 legalgpt-backend
+```
+
+### Frontend (Production Build)
+```bash
+cd legal-gpt-frontend
+npm run build
+# Deploy the build/ folder to your hosting service
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see LICENSE file for details.
+
+## 👨‍💻 Author
+
+**Rishikanth S**
+
+- GitHub: [Rishikanth-S007](https://github.com/Rishikanth-S007)
+- LegalGPT Repository: [github.com/Rishikanth-S007/LegalGPT](https://github.com/Rishikanth-S007/LegalGPT)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+For issues, questions, or suggestions, please open an issue on GitHub.
+
+## 🎯 Future Enhancements
+
+- Multi-language support
+- Advanced legal document analysis
+- Mobile app (React Native)
+- Integration with legal databases
+- Advanced analytics dashboard
+- Machine learning model improvements
 
 ### Analyzing the Bundle Size
 
