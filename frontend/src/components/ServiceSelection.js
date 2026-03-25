@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -57,12 +57,6 @@ const ServiceSelection = () => {
     // TODO: Implement Google Sign Up
     console.log('Google Sign Up clicked');
     setOpenSignUpDialog(false);
-  };
-
-  const handleGoogleLogin = () => {
-    // TODO: Implement Google Login
-    console.log('Google Login clicked');
-    setOpenLoginDialog(false);
   };
 
    const handleGoogleSuccess = async (credentialResponse) => {
