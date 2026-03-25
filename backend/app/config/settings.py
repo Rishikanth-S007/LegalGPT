@@ -24,7 +24,12 @@ class Settings(BaseSettings):
     google_client_secret: str = "not-needed-for-basic-functionality"
     
     # CORS
-    cors_origins: List[str] = ["http://localhost:3000", "https://localhost:3000"]
+    cors_origins: List[str] = [
+        "http://localhost:3000", 
+        "https://localhost:3000",
+        "https://legalgpt-backend.onrender.com",
+        "https://*.onrender.com",
+    ]
     
     # Security
     secret_key: str = "505df0dba1c285384ea8c65b9706b2eec5b80a34f462c909140f6d86abf852aa"

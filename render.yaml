@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: legalgpt-backend
+    runtime: python
+    region: virginia
+    plan: free
+    
+    # Build configuration
+    rootDir: backend
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python -c "from sentence_transformers import SentenceTransformer, CrossEncoder; SentenceTransformer('all-MiniLM-L6-v2'); CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')"
+    
+    # Start command
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    
+    # Environment variables
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      
+      - key: DATABASE_URL
+        value: sqlite:///./legal_gpt.db
+      
+      - key: JWT_SECRET
+        generateValue: true
+      
+      - key: SECRET_KEY
+        generateValue: true
+      
+      - key: JWT_ALGORITHM
+        value: HS256
+      
+      - key: JWT_EXPIRATION_HOURS
+        value: 24
+      
+      - key: OPENAI_API_KEY
+        value: sk-default-key-for-development
+      
+      - key: OPENAI_MODEL
+        value: gpt-3.5-turbo
+      
+      - key: GOOGLE_CLIENT_ID
+        value: 457325539713-as07rmv14vodsovqnht0qn4b1f4k9oiu.apps.googleusercontent.com
+      
+      - key: GOOGLE_CLIENT_SECRET
+        value: not-needed-for-basic-functionality
+      
+      - key: DEBUG
+        value: false
+    
+    # Health check
+    healthCheckPath: /
+    
+    # Persistent disk for SQLite database
+    disk:
+      name: legalgpt-data
+      mountPath: /opt/render/project/src/backend
+      sizeGB: 1
