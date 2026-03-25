@@ -3,6 +3,9 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+// API Base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
@@ -25,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       formData.append('username', email); // backend expects 'username' for OAuth2 password flow
       formData.append('password', password);
 
-      const response = await axios.post('http://localhost:8000/api/auth/login', formData);
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
       
       if (response.status === 200) {
         const { access_token } = response.data;
@@ -63,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/register', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/register`, {
         email,
         password
       });

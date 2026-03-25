@@ -29,6 +29,8 @@ class Settings(BaseSettings):
         "https://localhost:3000",
         "https://legalgpt-backend.onrender.com",
         "https://*.onrender.com",
+        "https://legal-gpt.vercel.app",
+        "https://*.vercel.app",
     ]
     
     # Security

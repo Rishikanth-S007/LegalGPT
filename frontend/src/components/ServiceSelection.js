@@ -68,7 +68,7 @@ const ServiceSelection = () => {
    const handleGoogleSuccess = async (credentialResponse) => {
      try {
        const result = await axios.post(
-         'http://localhost:8000/api/auth/google',
+         `${process.env.REACT_APP_BACKEND_URL}/api/auth/google`,
          { credential: credentialResponse.credential }
        );
        const { access_token, user } = result.data;
