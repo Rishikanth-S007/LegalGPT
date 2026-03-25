@@ -1,17 +1,8 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "framework": "create-react-app",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "REACT_APP_BACKEND_URL": "https://legalgpt-l5zb.onrender.com",
-    "REACT_APP_API_VERSION": "v1",
-    "REACT_APP_GOOGLE_CLIENT_ID": "457325539713-as07rmv14vodsovqnht0qn4b1f4k9oiu.apps.googleusercontent.com"
-  }
+  ]
 }
