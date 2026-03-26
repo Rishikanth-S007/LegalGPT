@@ -73,13 +73,17 @@ def is_cors_allowed(origin: str) -> bool:
 async def lifespan(app: FastAPI):
     """Start server immediately, initialize engine in background thread"""
     # Start engine in background thread - Server starts immediately without waiting
-    thread = threading.Thread(
-        target=initialize_engine_background,
-        daemon=True
-    )
-    thread.start()
-    print("[STARTUP] ⚡ Server started immediately! Engine loading in background...")
-    print("          Port is now open for Render health checks ✓")
+    try:
+        thread = threading.Thread(
+            target=initialize_engine_background,
+            daemon=True,
+            name="engine-init"
+        )
+        thread.start()
+        print("[STARTUP] ⚡ Server started immediately! Engine loading in background...")
+        print("          Port is now open for Render health checks ✓")
+    except Exception as e:
+        print(f"[WARN] Failed to start background thread: {e}")
     
     yield  # Server runs here
     

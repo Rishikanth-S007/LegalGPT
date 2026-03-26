@@ -1,4 +1,3 @@
-from app.services.law_predictor_service import predict_law
 from app.config.settings import settings
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -15,6 +14,9 @@ class AIService:
         """Process legal questions with a high-precision LOCAL predictive model"""
         
         try:
+            # Lazy import to avoid circular dependencies
+            from app.services.law_predictor_service import predict_law
+            
             print(f"Processing legal query with LOCAL Predictive Model: {question[:50]}...")
             
             # Use the high-precision local RAG engine via predict_law function
