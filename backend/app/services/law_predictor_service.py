@@ -76,31 +76,44 @@ def _build_index():
         _metadata = []
         return
     
-    # Load dataset
-    data = []
-    with open(DATASET_PATH, 'r', encoding='utf-8') as f:
-        for line in f:
-            data.append(json.loads(line))
-    
-    _metadata = data
-    instructions = [item['instruction'] for item in data]
-    
-    # Generate embeddings
-    print(f"   Encoding {len(instructions)} legal scenarios...")
-    embeddings = _embed_model.encode(instructions, show_progress_bar=True)
-    embeddings = np.array(embeddings).astype('float32')
-    
-    # Build FAISS index
-    dimension = embeddings.shape[1]
-    _index = faiss.IndexFlatL2(dimension)
-    _index.add(embeddings)
-    
-    # Save for persistence
-    faiss.write_index(_index, INDEX_PATH)
-    with open(METADATA_PATH, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
-    
-    print(f"   [OK] Index built successfully!")
+    try:
+        # Load dataset
+        data = []
+        with open(DATASET_PATH, 'r', encoding='utf-8') as f:
+            for line in f:
+                data.append(json.loads(line))
+        
+        _metadata = data
+        instructions = [item['instruction'] for item in data]
+        
+        # Generate embeddings (disable progress bar for Render deployment)
+        print(f"   Encoding {len(instructions)} legal scenarios...")
+        embeddings = _embed_model.encode(instructions, show_progress_bar=False)
+        embeddings = np.array(embeddings).astype('float32')
+        
+        # Build FAISS index
+        dimension = embeddings.shape[1]
+        _index = faiss.IndexFlatL2(dimension)
+        _index.add(embeddings)
+        
+        # Try to save for persistence (may fail on read-only filesystem)
+        try:
+            faiss.write_index(_index, INDEX_PATH)
+            with open(METADATA_PATH, 'w', encoding='utf-8') as f:
+                json.dump(data, f)
+            print(f"   [OK] Index saved to disk")
+        except Exception as save_error:
+            print(f"   [WARN] Could not save index to disk: {save_error}")
+            print(f"   [OK] Index kept in memory only")
+        
+        print(f"   [OK] Index built successfully!")
+    except Exception as e:
+        print(f"   [ERROR] Failed to build index: {e}")
+        import traceback
+        traceback.print_exc()
+        # Set minimal fallback
+        _index = None
+        _metadata = []
 
 
 # ============================================================================

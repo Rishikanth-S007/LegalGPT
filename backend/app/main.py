@@ -47,6 +47,7 @@ def initialize_engine_background():
         print(f"❌ [ERROR] Engine initialization failed: {e}")
         import traceback
         traceback.print_exc()
+        # Don't set event - keep engine_ready as False
 
 # ============================================================================
 # CUSTOM CORS HANDLER - Supports wildcard patterns
