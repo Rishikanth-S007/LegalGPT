@@ -27,10 +27,9 @@ class Settings(BaseSettings):
     cors_origins: List[str] = [
         "http://localhost:3000", 
         "https://localhost:3000",
-        "https://legalgpt-backend.onrender.com",
-        "https://*.onrender.com",
+        "https://legalgpt-l5zb.onrender.com",
+        "https://legal-4vfiljk4y-rishikanth-s007s-projects.vercel.app",
         "https://legal-gpt.vercel.app",
-        "https://*.vercel.app",
     ]
     
     # Security

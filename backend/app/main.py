@@ -1,8 +1,10 @@
 import sys
 from contextlib import asynccontextmanager
+import re
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
@@ -17,6 +19,23 @@ from app.db.base import Base
 
 # Create DB tables
 Base.metadata.create_all(bind=engine)
+
+# ============================================================================
+# CUSTOM CORS HANDLER - Supports wildcard patterns
+# ============================================================================
+def is_cors_allowed(origin: str) -> bool:
+    """Check if origin is allowed with wildcard pattern support"""
+    allowed_patterns = [
+        r"^https?://localhost:3000$",
+        r"^https://legalgpt-l5zb\.onrender\.com$",
+        r"^https://.*\.vercel\.app$",  # Matches all Vercel deployments
+        r"^https://legal-gpt\.vercel\.app$",
+    ]
+    
+    for pattern in allowed_patterns:
+        if re.match(pattern, origin):
+            return True
+    return False
 
 # ============================================================================
 # LIFESPAN CONTEXT - Loads models ONCE at startup
@@ -63,14 +82,37 @@ app = FastAPI(
     lifespan=lifespan  # <-- This ensures one-time initialization
 )
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Add CORS middleware with custom origin checker
+@app.middleware("http")
+async def cors_middleware(request: Request, call_next):
+    """Custom CORS middleware that supports wildcard patterns"""
+    origin = request.headers.get("origin")
+    
+    # Handle preflight requests
+    if request.method == "OPTIONS":
+        if origin and is_cors_allowed(origin):
+            return Response(
+                status_code=200,
+                headers={
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                    "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
+                },
+            )
+    
+    # Process request
+    response = await call_next(request)
+    
+    # Add CORS headers to response
+    if origin and is_cors_allowed(origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    
+    return response
 
 # Include Auth Router
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
