@@ -1,6 +1,7 @@
 import sys
 from contextlib import asynccontextmanager
 import re
+import threading
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +22,33 @@ from app.db.base import Base
 Base.metadata.create_all(bind=engine)
 
 # ============================================================================
+# BACKGROUND ENGINE INITIALIZATION - For Render deployment
+# ============================================================================
+# Thread-safe event to track if engine is ready
+engine_ready_event = threading.Event()
+
+def initialize_engine_background():
+    """Initialize FAISS and models in background thread"""
+    print("\n" + "="*60)
+    print("[STARTUP] STARTING LEGALGPT ENGINE IN BACKGROUND...")
+    print("="*60)
+    
+    try:
+        # Import and initialize law predictor service
+        from app.services import law_predictor_service
+        law_predictor_service.initialize()
+        
+        # Set event - thread-safe notification that engine is ready
+        engine_ready_event.set()
+        print("="*60)
+        print("[SUCCESS] ENGINE READY - Models loaded and cached in memory")
+        print("="*60 + "\n")
+    except Exception as e:
+        print(f"❌ [ERROR] Engine initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+# ============================================================================
 # CUSTOM CORS HANDLER - Supports wildcard patterns
 # ============================================================================
 def is_cors_allowed(origin: str) -> bool:
@@ -38,22 +66,19 @@ def is_cors_allowed(origin: str) -> bool:
     return False
 
 # ============================================================================
-# LIFESPAN CONTEXT - Loads models ONCE at startup
+# LIFESPAN CONTEXT - Starts server immediately, loads models in background
 # ============================================================================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load models once at startup, keep them in memory"""
-    print("\n" + "="*60)
-    print("[STARTUP] STARTING LEGALGPT ENGINE...")
-    print("="*60)
-    
-    # Import and initialize law predictor service
-    from app.services import law_predictor_service
-    law_predictor_service.initialize()
-    
-    print("="*60)
-    print("[SUCCESS] ENGINE READY - Models loaded and cached in memory")
-    print("="*60 + "\n")
+    """Start server immediately, initialize engine in background thread"""
+    # Start engine in background thread - Server starts immediately without waiting
+    thread = threading.Thread(
+        target=initialize_engine_background,
+        daemon=True
+    )
+    thread.start()
+    print("[STARTUP] ⚡ Server started immediately! Engine loading in background...")
+    print("          Port is now open for Render health checks ✓")
     
     yield  # Server runs here
     
@@ -130,13 +155,18 @@ def read_root():
 
 @app.get("/health")
 def health_check():
+    """Health check with engine status"""
+    is_ready = engine_ready_event.is_set()
     return {
-        "status": "healthy",
+        "status": "ok" if is_ready else "loading",
+        "engine_ready": is_ready,
         "timestamp": datetime.now().isoformat(),
         "services": {
             "ai_service": "operational",
-            "scholarship_service": "operational"
-        }
+            "scholarship_service": "operational",
+            "law_engine": "ready" if is_ready else "initializing (2-3 minutes)"
+        },
+        "message": "Engine ready!" if is_ready else "Engine is loading... Please wait 2-3 minutes."
     }
 
 @app.get("/api/test/ping")
@@ -148,6 +178,13 @@ def ping():
 @app.post("/api/legal/query")
 async def process_legal_query(request: LegalQuery):
     """Process legal questions with AI - matches your ChatInterface expectations"""
+    
+    # Check if engine is ready
+    if not engine_ready_event.is_set():
+        raise HTTPException(
+            status_code=503,
+            detail="Engine is still initializing. Please try again in 2-3 minutes."
+        )
     
     try:
         # Process with AI service
@@ -208,6 +245,13 @@ async def predict_law_route(request: QueryRequest):
     Law prediction endpoint - uses pre-loaded global models
     NO model initialization happens here
     """
+    # Check if engine is ready
+    if not engine_ready_event.is_set():
+        raise HTTPException(
+            status_code=503,
+            detail="Engine is still initializing. Please try again in 2-3 minutes."
+        )
+    
     try:
         print(f"[API] Received prediction request: {request.query[:50]}...")
         
