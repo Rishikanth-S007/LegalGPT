@@ -11,7 +11,7 @@ import os
 
 router = APIRouter()
 
-@router.post("/api/auth/google")
+@router.post("/google")
 async def google_login(
     data: dict,
     db: Session = Depends(get_db)

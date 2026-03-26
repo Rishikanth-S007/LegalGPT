@@ -118,35 +118,42 @@ async def cors_middleware(request: Request, call_next):
     """Custom CORS middleware that supports wildcard patterns"""
     origin = request.headers.get("origin")
     
+    # Always allow CORS if origin matches
+    allowed = origin and is_cors_allowed(origin)
+    
     # Handle preflight requests
     if request.method == "OPTIONS":
-        if origin and is_cors_allowed(origin):
+        if allowed:
             return Response(
                 status_code=200,
                 headers={
                     "Access-Control-Allow-Origin": origin,
-                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
                     "Access-Control-Allow-Headers": "Content-Type, Authorization",
                     "Access-Control-Allow-Credentials": "true",
-                    "Access-Control-Max-Age": "3600",
+                    "Access-Control-Max-Age": "86400",
                 },
             )
+        else:
+            # Still return 200 for non-matching origins (browsers need this)
+            return Response(status_code=200)
     
     # Process request
     response = await call_next(request)
     
     # Add CORS headers to response
-    if origin and is_cors_allowed(origin):
+    if allowed:
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Expose-Headers"] = "Content-Type"
     
     return response
 
 # Include Auth Router
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(google_auth.router)
+app.include_router(google_auth.router, prefix="/api/auth", tags=["auth"])
 
 # Basic routes
 @app.get("/")
